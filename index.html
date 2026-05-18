@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GroupShot — Team Photo Creator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;500;600&family=Montserrat:wght@400;700&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #111410;
@@ -12,7 +12,7 @@
       --surface2: #222820;
       --green: #1b3a2d;
       --green-light: #2d5c44;
-      --red: #c0392b;
+      --red: #181010;
       --red-light: #e74c3c;
       --cream: #f0ead6;
       --cream-dim: #c8bfa8;
@@ -158,19 +158,27 @@
     /* ── THUMBNAILS ── */
     .thumb-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 6px;
       margin-top: 16px;
     }
     .thumb-item {
       position: relative;
-      aspect-ratio: 1;
       border-radius: 4px;
-      overflow: hidden;
       border: 2px solid var(--border);
       background: var(--surface2);
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
     }
-    .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 2px 2px 0 0;
+    }
+    .thumb-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .thumb-item .remove-btn {
       position: absolute;
       top: 2px; right: 2px;
@@ -184,8 +192,35 @@
       display: flex; align-items: center; justify-content: center;
       opacity: 0;
       transition: opacity 0.15s;
+      z-index: 2;
     }
     .thumb-item:hover .remove-btn { opacity: 1; }
+    .thumb-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 3px 4px 4px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 0 0 2px 2px;
+    }
+    .thumb-meta input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--cream);
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      padding: 1px 2px;
+      outline: none;
+      transition: border-color 0.15s;
+      box-sizing: border-box;
+    }
+    .thumb-meta input:focus { border-bottom-color: var(--red); }
+    .thumb-meta input::placeholder { color: var(--gray); font-size: 0.65rem; }
+    .thumb-meta input.meta-name { font-weight: 600; }
+    .thumb-meta input.meta-desig { color: var(--cream-dim); }
 
     /* ── SECTION LABEL ── */
     .sec-label {
@@ -199,35 +234,136 @@
     }
     .sec-label:first-child { margin-top: 0; }
 
-    /* ── OPTION GRID ── */
-    .opt-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .opt-btn {
+    /* ── SELECT DROPDOWNS ── */
+    .sel-wrap { position: relative; width: 100%; }
+    .sel-select {
+      width: 100%;
       background: var(--surface2);
       border: 1.5px solid var(--border);
-      color: var(--cream-dim);
-      padding: 7px 14px;
-      border-radius: 3px;
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-transform: uppercase;
-    }
-    .opt-btn:hover { border-color: var(--green-light); color: var(--cream); }
-    .opt-btn.active {
-      background: var(--green);
-      border-color: var(--red);
       color: var(--cream);
+      padding: 10px 38px 10px 14px;
+      border-radius: 3px;
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.15s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7066' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
     }
-    .opt-btn.shape-btn { min-width: 70px; }
-    .shape-icon { display: block; font-size: 1.4rem; text-align: center; margin-bottom: 2px; }
+    .sel-select:focus { border-color: var(--red); }
+    .sel-select:hover { border-color: var(--green-light); }
+    .sel-select option { background: #1a1e18; color: var(--cream); }
+    .bg-upload-wrap {
+      display: none;
+      margin-top: 10px;
+      position: relative;
+    }
+    .bg-upload-wrap.visible { display: block; }
+    .bg-upload-btn {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px dashed var(--border);
+      color: var(--cream-dim);
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bg-upload-btn:hover { border-color: var(--red); color: var(--cream); }
+    .bg-upload-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .bg-preview-thumb {
+      width: 100%;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      margin-top: 8px;
+      display: none;
+    }
+    .bg-preview-thumb.visible { display: block; }
+
+    /* ── LOGO GRID ── */
+    .logo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .logo-slot { display: flex; flex-direction: column; gap: 5px; }
+    .logo-slot-num { font-size: 0.62rem; color: var(--gray); letter-spacing: 1px; font-family: var(--font-body); text-transform: uppercase; }
+    .logo-thumb-label { position: relative; cursor: pointer; display: block; }
+    .logo-thumb-label input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .logo-thumb-box {
+      height: 52px;
+      border: 1.5px dashed var(--border);
+      border-radius: 3px;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .logo-thumb-box:hover { border-color: var(--red); }
+    .logo-thumb-box .logo-plus { color: var(--gray); font-size: 1.3rem; }
+    .logo-thumb-box img { width: 100%; height: 100%; object-fit: contain; display: none; }
+    .logo-thumb-box.has-img img { display: block; }
+    .logo-thumb-box.has-img .logo-plus { display: none; }
+
+    /* ── TEXT CONTROLS ── */
+    .text-ctrl-row { display: grid; grid-template-columns: 1fr 1fr 58px; gap: 5px; margin-top: 6px; margin-bottom: 12px; }
+    .size-input {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--cream);
+      padding: 10px 4px;
+      border-radius: 3px;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      outline: none;
+      text-align: center;
+      width: 100%;
+      transition: border-color 0.15s;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+    .size-input::-webkit-inner-spin-button, .size-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .size-input:focus { border-color: var(--red); }
+
+    /* ── SLIDERS ── */
+    .slider-wrap { margin-bottom: 14px; }
+    .slider-label-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 5px;
+      font-family: var(--font-ui); font-size: 0.82rem; color: var(--cream-dim);
+    }
+    .slider-label-row .sval {
+      font-family: var(--font-body); font-size: 0.72rem;
+      color: var(--red-light); letter-spacing: 0.5px; min-width: 38px; text-align: right;
+    }
+    .slider-input {
+      width: 100%; display: block;
+      -webkit-appearance: none; appearance: none;
+      height: 4px; border-radius: 2px;
+      background: var(--border); outline: none; cursor: pointer;
+    }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--red); border: 2px solid var(--bg);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .slider-input::-webkit-slider-thumb:hover { background: var(--red-light); }
+    .slider-input::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--red); border: 2px solid var(--bg); cursor: pointer;
+    }
 
     /* ── INPUTS ── */
+    /* kept: .opt-grid / .opt-btn unused but harmless */
     .text-input {
       width: 100%;
       background: var(--surface2);
@@ -428,19 +564,21 @@
         </div>
         <div class="panel-body">
           <div class="sec-label">Aspect Ratio</div>
-          <div class="opt-grid" id="ratioGrid">
-            <button class="opt-btn" data-ratio="16:9">16:9</button>
-            <button class="opt-btn active" data-ratio="9:16">9:16</button>
-            <button class="opt-btn" data-ratio="4:5">4:5</button>
-            <button class="opt-btn" data-ratio="5:4">5:4</button>
-            <button class="opt-btn" data-ratio="1:1">1:1</button>
-            <button class="opt-btn" data-ratio="3:2">3:2</button>
-            <button class="opt-btn" data-ratio="2:3">2:3</button>
-            <button class="opt-btn" data-ratio="4:3">4:3</button>
-            <button class="opt-btn" data-ratio="3:4">3:4</button>
-            <button class="opt-btn" data-ratio="21:9">21:9</button>
-            <button class="opt-btn" data-ratio="2:1">2:1</button>
-            <button class="opt-btn" data-ratio="1:2">1:2</button>
+          <div class="sel-wrap">
+            <select class="sel-select" id="ratioSelect">
+              <option value="9:16" selected>9:16 — Portrait (default)</option>
+              <option value="16:9">16:9 — Landscape</option>
+              <option value="1:1">1:1 — Square</option>
+              <option value="4:5">4:5 — Instagram Portrait</option>
+              <option value="5:4">5:4 — Instagram Landscape</option>
+              <option value="3:2">3:2 — Classic Photo</option>
+              <option value="2:3">2:3 — Classic Portrait</option>
+              <option value="4:3">4:3 — Standard</option>
+              <option value="3:4">3:4 — Standard Portrait</option>
+              <option value="21:9">21:9 — Cinematic</option>
+              <option value="2:1">2:1 — Wide Banner</option>
+              <option value="1:2">1:2 — Tall Banner</option>
+            </select>
           </div>
         </div>
       </div>
@@ -452,65 +590,196 @@
           <h2>Photo Shape</h2>
         </div>
         <div class="panel-body">
-          <div class="opt-grid" id="shapeGrid">
-            <button class="opt-btn shape-btn active" data-shape="circle">
-              <span class="shape-icon">⬤</span>Circle
-            </button>
-            <button class="opt-btn shape-btn" data-shape="square">
-              <span class="shape-icon">■</span>Square
-            </button>
-            <button class="opt-btn shape-btn" data-shape="rounded">
-              <span class="shape-icon">▣</span>Rounded
-            </button>
-            <button class="opt-btn shape-btn" data-shape="heart">
-              <span class="shape-icon">♥</span>Heart
-            </button>
-            <button class="opt-btn shape-btn" data-shape="hexagon">
-              <span class="shape-icon">⬡</span>Hexagon
-            </button>
-            <button class="opt-btn shape-btn" data-shape="diamond">
-              <span class="shape-icon">◆</span>Diamond
-            </button>
-            <button class="opt-btn shape-btn" data-shape="star">
-              <span class="shape-icon">★</span>Star
-            </button>
+          <div class="sel-wrap">
+            <select class="sel-select" id="shapeSelect">
+              <option value="circle" selected>⬤  Circle</option>
+              <option value="hexagon">⬡  Hexagon</option>
+              <option value="square">■  Square</option>
+              <option value="rounded">▣  Rounded Square</option>
+              <option value="diamond">◆  Diamond</option>
+              <option value="heart">♥  Heart</option>
+              <option value="star">★  Star</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <!-- TEXT -->
+      <!-- CUSTOMIZE -->
       <div class="panel">
         <div class="panel-header">
           <div class="panel-num">4</div>
-          <h2>Title & Subtitle</h2>
+          <h2>Customize</h2>
         </div>
         <div class="panel-body">
-          <div class="input-row">
-            <div class="sec-label">Title (optional)</div>
-            <input class="text-input" id="titleInput" type="text" placeholder="e.g. TEAM ALPHA 2025" maxlength="50" />
-          </div>
-          <div class="input-row">
-            <div class="sec-label">Subtitle (optional)</div>
-            <input class="text-input" id="subtitleInput" type="text" placeholder="e.g. Champions · Season 7" maxlength="80" />
+
+          <!-- LAYOUT -->
+          <div class="sec-label">Layout</div>
+          <div class="sel-wrap" style="margin-bottom:12px;">
+            <select class="sel-select" id="layoutSelect">
+              <option value="auto" selected>Auto Grid</option>
+              <option value="row">Single Row</option>
+              <option value="pyramid">Pyramid</option>
+            </select>
           </div>
 
-          <!-- LAYOUT OPTIONS -->
-          <div class="sec-label" style="margin-top:20px;">Layout</div>
-          <div class="opt-grid" id="layoutGrid">
-            <button class="opt-btn active" data-layout="auto">Auto Grid</button>
-            <button class="opt-btn" data-layout="row">Single Row</button>
-            <button class="opt-btn" data-layout="pyramid">Pyramid</button>
+          <!-- PHOTO SPACING & SIZE -->
+          <div class="slider-wrap">
+            <div class="slider-label-row">Gap between photos <span class="sval" id="gapValDisplay">1.0×</span></div>
+            <input class="slider-input" type="range" id="photoGapRange" min="0" max="3" step="0.1" value="1" />
+          </div>
+          <div class="slider-wrap">
+            <div class="slider-label-row">Photo size <span class="sval" id="sizeValDisplay">100%</span></div>
+            <input class="slider-input" type="range" id="photoSizeRange" min="40" max="160" step="5" value="100" />
           </div>
 
-          <!-- BG OPTIONS -->
-          <div class="sec-label" style="margin-top:16px;">Background</div>
-          <div class="opt-grid" id="bgGrid">
-            <button class="opt-btn active" data-bg="dark">Dark</button>
-            <button class="opt-btn" data-bg="green">Forest</button>
-            <button class="opt-btn" data-bg="red">Red</button>
-            <button class="opt-btn" data-bg="light">Light</button>
-            <button class="opt-btn" data-bg="gradient">Gradient</button>
+          <!-- BACKGROUND -->
+          <div class="sec-label">Background</div>
+          <div class="sel-wrap" style="margin-bottom:8px;">
+            <select class="sel-select" id="bgSelect">
+              <option value="dark" selected>Dark</option>
+              <option value="green">Forest Green</option>
+              <option value="red">Red</option>
+              <option value="light">Light</option>
+              <option value="gradient">Gradient</option>
+              <option value="custom">&#128247; Custom Image…</option>
+            </select>
           </div>
+          <div class="bg-upload-wrap" id="bgUploadWrap">
+            <label class="bg-upload-btn">
+              <input type="file" id="bgImageInput" accept="image/*" />
+              <span>&#128247;</span> <span id="bgUploadLabel">Click to upload background image</span>
+            </label>
+            <img id="bgPreviewThumb" class="bg-preview-thumb" alt="bg preview" />
+          </div>
+
+          <!-- BG REMOVAL -->
+          <div class="sec-label">Background Removal</div>
+          <div class="sel-wrap" style="margin-bottom:14px;">
+            <select class="sel-select rembg-on" id="bgRemovalSelect">
+              <option value="on" selected>✂ On — Clean cutout (recommended)</option>
+              <option value="off">⚡ Off — Original photo (faster)</option>
+            </select>
+          </div>
+
+          <!-- LOGOS -->
+          <div class="sec-label">Logos (up to 4)</div>
+          <div class="logo-grid">
+            <!-- Logo 1 -->
+            <div class="logo-slot">
+              <div class="logo-slot-num">Logo 1</div>
+              <label class="logo-thumb-label">
+                <input type="file" class="logo-file-input" data-slot="0" accept="image/*" />
+                <div class="logo-thumb-box" id="logoThumb0"><span class="logo-plus">+</span><img /></div>
+              </label>
+              <select class="sel-select logo-pos-sel" data-slot="0">
+                <option value="lt">↖ Left Top</option>
+                <option value="ct">↑ Center Top</option>
+                <option value="rt" selected>↗ Right Top</option>
+                <option value="lb">↙ Left Bottom</option>
+                <option value="cb">↓ Center Bottom</option>
+                <option value="rb">↘ Right Bottom</option>
+              </select>
+            </div>
+            <!-- Logo 2 -->
+            <div class="logo-slot">
+              <div class="logo-slot-num">Logo 2</div>
+              <label class="logo-thumb-label">
+                <input type="file" class="logo-file-input" data-slot="1" accept="image/*" />
+                <div class="logo-thumb-box" id="logoThumb1"><span class="logo-plus">+</span><img /></div>
+              </label>
+              <select class="sel-select logo-pos-sel" data-slot="1">
+                <option value="lt">↖ Left Top</option>
+                <option value="ct">↑ Center Top</option>
+                <option value="rt">↗ Right Top</option>
+                <option value="lb" selected>↙ Left Bottom</option>
+                <option value="cb">↓ Center Bottom</option>
+                <option value="rb">↘ Right Bottom</option>
+              </select>
+            </div>
+            <!-- Logo 3 -->
+            <div class="logo-slot">
+              <div class="logo-slot-num">Logo 3</div>
+              <label class="logo-thumb-label">
+                <input type="file" class="logo-file-input" data-slot="2" accept="image/*" />
+                <div class="logo-thumb-box" id="logoThumb2"><span class="logo-plus">+</span><img /></div>
+              </label>
+              <select class="sel-select logo-pos-sel" data-slot="2">
+                <option value="lt" selected>↖ Left Top</option>
+                <option value="ct">↑ Center Top</option>
+                <option value="rt">↗ Right Top</option>
+                <option value="lb">↙ Left Bottom</option>
+                <option value="cb">↓ Center Bottom</option>
+                <option value="rb">↘ Right Bottom</option>
+              </select>
+            </div>
+            <!-- Logo 4 -->
+            <div class="logo-slot">
+              <div class="logo-slot-num">Logo 4</div>
+              <label class="logo-thumb-label">
+                <input type="file" class="logo-file-input" data-slot="3" accept="image/*" />
+                <div class="logo-thumb-box" id="logoThumb3"><span class="logo-plus">+</span><img /></div>
+              </label>
+              <select class="sel-select logo-pos-sel" data-slot="3">
+                <option value="lt">↖ Left Top</option>
+                <option value="ct">↑ Center Top</option>
+                <option value="rt">↗ Right Top</option>
+                <option value="lb">↙ Left Bottom</option>
+                <option value="cb">↓ Center Bottom</option>
+                <option value="rb" selected>↘ Right Bottom</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TITLE -->
+          <div class="sec-label">Title (optional)</div>
+          <input class="text-input" id="titleInput" type="text" placeholder="e.g. TEAM ALPHA 2025" maxlength="80" />
+          <div class="text-ctrl-row">
+            <select class="sel-select" id="titlePosSelect">
+              <option value="lb">↙ Left Bottom</option>
+              <option value="cb" selected>↓ Center Bottom</option>
+              <option value="rb">↘ Right Bottom</option>
+              <option value="lt">↖ Left Top</option>
+              <option value="ct">↑ Center Top</option>
+              <option value="rt">↗ Right Top</option>
+              <option value="c">⊕ Center Screen</option>
+            </select>
+            <select class="sel-select" id="titleFontSelect">
+              <option value="Bebas Neue" selected>Bebas Neue</option>
+              <option value="Anton">Anton</option>
+              <option value="Oswald">Oswald</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Inter">Inter</option>
+            </select>
+            <input class="size-input" id="titleSizeInput" type="number" value="80" min="16" max="300" title="Font size" />
+          </div>
+
+          <!-- SUBTITLE -->
+          <div class="sec-label">Subtitle (optional)</div>
+          <input class="text-input" id="subtitleInput" type="text" placeholder="e.g. Champions · Season 7" maxlength="120" />
+          <div class="text-ctrl-row">
+            <select class="sel-select" id="subtitlePosSelect">
+              <option value="lb">↙ Left Bottom</option>
+              <option value="cb" selected>↓ Center Bottom</option>
+              <option value="rb">↘ Right Bottom</option>
+              <option value="lt">↖ Left Top</option>
+              <option value="ct">↑ Center Top</option>
+              <option value="rt">↗ Right Top</option>
+              <option value="c">⊕ Center Screen</option>
+            </select>
+            <select class="sel-select" id="subtitleFontSelect">
+              <option value="Bebas Neue">Bebas Neue</option>
+              <option value="Anton">Anton</option>
+              <option value="Oswald" selected>Oswald</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Inter">Inter</option>
+            </select>
+            <input class="size-input" id="subtitleSizeInput" type="number" value="40" min="12" max="200" title="Font size" />
+          </div>
+
         </div>
       </div>
 
@@ -572,12 +841,24 @@
 const state = {
   files: [],
   images: [],
+  photoMeta: [],   // [{name, designation}] parallel to files/images
   ratio: '9:16',
   shape: 'circle',
   layout: 'auto',
   bg: 'dark',
+  bgImage: null,
+  bgRemoval: true,
+  logos: [null, null, null, null], // each: {img, position} or null
+  photoGap: 1.0,   // gap multiplier: 0 = no gap, 1 = default, 3 = triple
+  photoSize: 1.0,  // size scale: 0.4 = 40%, 1.0 = 100%, 1.6 = 160%
   title: '',
-  subtitle: ''
+  titlePos: 'cb',
+  titleFont: 'Bebas Neue',
+  titleSize: 80,
+  subtitle: '',
+  subtitlePos: 'cb',
+  subtitleFont: 'Oswald',
+  subtitleSize: 40,
 };
 
 // ═══════════════════════════════════════════════
@@ -608,6 +889,7 @@ function handleFiles(newFiles) {
     const url = URL.createObjectURL(f);
     state.files.push(f);
     state.images.push(url);
+    state.photoMeta.push({ name: '', designation: '' });
   });
   renderThumbs();
   updateUI();
@@ -625,20 +907,44 @@ dropZone.addEventListener('drop', e => {
 function renderThumbs() {
   thumbGrid.innerHTML = '';
   state.images.forEach((url, i) => {
+    const meta = state.photoMeta[i] || { name: '', designation: '' };
     const wrap = document.createElement('div');
     wrap.className = 'thumb-item';
-    wrap.innerHTML = `<img src="${url}" /><button class="remove-btn" data-i="${i}">✕</button>`;
+    wrap.innerHTML = `
+      <div class="thumb-img-wrap">
+        <img src="${url}" />
+        <button class="remove-btn" data-i="${i}">✕</button>
+      </div>
+      <div class="thumb-meta">
+        <input class="meta-name" type="text" placeholder="Name" maxlength="40"
+          value="${escHtml(meta.name)}" data-i="${i}" data-field="name" />
+        <input class="meta-desig" type="text" placeholder="Designation" maxlength="40"
+          value="${escHtml(meta.designation)}" data-i="${i}" data-field="designation" />
+      </div>`;
     thumbGrid.appendChild(wrap);
   });
   thumbGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.addEventListener('click', e => {
-      const i = +e.target.dataset.i;
+      const i = +e.currentTarget.dataset.i;
+      invalidateCacheForIndex(i);
       state.files.splice(i, 1);
       state.images.splice(i, 1);
+      state.photoMeta.splice(i, 1);
       renderThumbs();
       updateUI();
     });
   });
+  thumbGrid.querySelectorAll('.thumb-meta input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const i = +inp.dataset.i;
+      if (!state.photoMeta[i]) state.photoMeta[i] = { name: '', designation: '' };
+      state.photoMeta[i][inp.dataset.field] = inp.value;
+    });
+  });
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 }
 
 function updateUI() {
@@ -650,32 +956,100 @@ function updateUI() {
 }
 
 // ═══════════════════════════════════════════════
-// OPTION BUTTONS
+// OPTION SELECTS
 // ═══════════════════════════════════════════════
-function bindOpts(gridId, stateKey, badgeEl) {
-  const grid = document.getElementById(gridId);
-  grid.querySelectorAll('.opt-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      grid.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state[stateKey] = btn.dataset[stateKey === 'layout' ? 'layout' : stateKey === 'bg' ? 'bg' : stateKey === 'shape' ? 'shape' : 'ratio'];
-      if (badgeEl) badgeEl.textContent = btn.dataset[stateKey === 'shape' ? 'shape' : 'ratio'] || btn.textContent.trim();
-    });
+function bindSelect(id, stateKey, badgeEl) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.addEventListener('change', () => {
+    state[stateKey] = sel.value;
+    if (badgeEl) badgeEl.textContent = sel.value;
   });
 }
-bindOpts('ratioGrid', 'ratio', badgeRatio);
-bindOpts('shapeGrid', 'shape', badgeShape);
-bindOpts('layoutGrid', 'layout', null);
-bindOpts('bgGrid', 'bg', null);
+bindSelect('ratioSelect', 'ratio', badgeRatio);
+bindSelect('shapeSelect', 'shape', badgeShape);
+bindSelect('layoutSelect', 'layout', null);
+bindSelect('bgSelect', 'bg', null);
 
-// Fix badge updates for shape/bg/layout
-document.getElementById('shapeGrid').querySelectorAll('.opt-btn').forEach(btn => {
-  btn.addEventListener('click', () => { badgeShape.textContent = btn.dataset.shape; });
+// Custom background image
+const bgUploadWrap = document.getElementById('bgUploadWrap');
+const bgImageInput = document.getElementById('bgImageInput');
+const bgPreviewThumb = document.getElementById('bgPreviewThumb');
+const bgUploadLabel  = document.getElementById('bgUploadLabel');
+document.getElementById('bgSelect').addEventListener('change', function() {
+  bgUploadWrap.classList.toggle('visible', this.value === 'custom');
+});
+bgImageInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    state.bgImage = img;
+    bgPreviewThumb.src = url;
+    bgPreviewThumb.classList.add('visible');
+    bgUploadLabel.textContent = file.name;
+  };
+  img.src = url;
+});
+
+// BG Removal toggle
+const bgRemovalSel = document.getElementById('bgRemovalSelect');
+bgRemovalSel.addEventListener('change', () => {
+  state.bgRemoval = bgRemovalSel.value === 'on';
+  bgRemovalSel.className = 'sel-select ' + (state.bgRemoval ? 'rembg-on' : 'rembg-off');
+  _processCache.clear(); // processed results differ — clear cache
 });
 
 // Text inputs
 titleInput.addEventListener('input', () => state.title = titleInput.value);
 subtitleInput.addEventListener('input', () => state.subtitle = subtitleInput.value);
+
+// Logo upload handlers
+document.querySelectorAll('.logo-file-input').forEach(inp => {
+  inp.addEventListener('change', e => {
+    const slot = parseInt(inp.dataset.slot);
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const imgEl = document.querySelector(`#logoThumb${slot} img`);
+    const box   = document.getElementById(`logoThumb${slot}`);
+    const posSel = document.querySelector(`.logo-pos-sel[data-slot="${slot}"]`);
+    const img = new Image();
+    img.onload = () => {
+      state.logos[slot] = { img, position: posSel ? posSel.value : 'rt' };
+      imgEl.src = url;
+      box.classList.add('has-img');
+    };
+    img.src = url;
+  });
+});
+document.querySelectorAll('.logo-pos-sel').forEach(sel => {
+  sel.addEventListener('change', () => {
+    const slot = parseInt(sel.dataset.slot);
+    if (state.logos[slot]) state.logos[slot].position = sel.value;
+  });
+});
+
+// Title / subtitle controls
+// Photo gap & size sliders
+const gapRange  = document.getElementById('photoGapRange');
+const sizeRange = document.getElementById('photoSizeRange');
+gapRange.addEventListener('input', () => {
+  state.photoGap = parseFloat(gapRange.value);
+  document.getElementById('gapValDisplay').textContent = state.photoGap.toFixed(1) + '\u00d7';
+});
+sizeRange.addEventListener('input', () => {
+  state.photoSize = parseInt(sizeRange.value) / 100;
+  document.getElementById('sizeValDisplay').textContent = parseInt(sizeRange.value) + '%';
+});
+
+document.getElementById('titlePosSelect').addEventListener('change', e => state.titlePos = e.target.value);
+document.getElementById('titleFontSelect').addEventListener('change', e => state.titleFont = e.target.value);
+document.getElementById('titleSizeInput').addEventListener('input', e => state.titleSize = Math.max(16, +e.target.value || 80));
+document.getElementById('subtitlePosSelect').addEventListener('change', e => state.subtitlePos = e.target.value);
+document.getElementById('subtitleFontSelect').addEventListener('change', e => state.subtitleFont = e.target.value);
+document.getElementById('subtitleSizeInput').addEventListener('input', e => state.subtitleSize = Math.max(12, +e.target.value || 40));
 
 // ═══════════════════════════════════════════════
 // CANVAS DIMENSIONS
@@ -753,6 +1127,18 @@ function applyClipShape(ctx, x, y, size, shape) {
 // DRAW BACKGROUND
 // ═══════════════════════════════════════════════
 function drawBackground(ctx, W, H, bg) {
+  if (bg === 'custom' && state.bgImage) {
+    // Draw uploaded image as cover-fill
+    const img = state.bgImage;
+    const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    const dw = img.naturalWidth * scale;
+    const dh = img.naturalHeight * scale;
+    ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    // Slight dark overlay so subjects stand out
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0, 0, W, H);
+    return;
+  }
   if (bg === 'dark') {
     ctx.fillStyle = '#111410'; ctx.fillRect(0, 0, W, H);
     // subtle noise texture via repeating tiny rects
@@ -788,20 +1174,24 @@ function drawBackground(ctx, W, H, bg) {
 // ═══════════════════════════════════════════════
 // LAYOUT COMPUTATION
 // ═══════════════════════════════════════════════
-function computeLayout(n, W, H, titleH, subtitleH, layout) {
-  const padding = Math.min(W, H) * 0.05;
-  const availW = W - padding * 2;
-  const usedH = titleH + subtitleH;
-  const topPad = usedH > 0 ? usedH + padding * 0.5 : padding * 0.5;
-  const availH = H - topPad - padding - usedH * 0;
+// Layout zones: header 12.5% | content 75% | footer 12.5%
+// labelH = vertical pixels to reserve below each photo for name/designation text
+function computeLayout(n, W, H, layout, labelH = 0, gapMult = 1) {
+  const contentTop = H * 0.125;
+  const contentH   = H * 0.75;
+  const padding    = Math.min(W, contentH) * 0.04;
+  const availW     = W - padding * 2;
+  const availH     = contentH - padding * 2;  // full zone; labelH handled per-row below
+  const gap        = padding * 0.35 * gapMult;
 
   if (layout === 'row') {
-    const size = Math.min(availH - padding, availW / n - padding * 0.3);
-    const totalW = n * size + (n - 1) * padding * 0.3;
+    // One row: height must fit photo + label
+    const size   = Math.min(availH - labelH, (availW - gap * (n - 1)) / n);
+    const totalW = size * n + gap * (n - 1);
     const startX = (W - totalW) / 2;
-    const startY = topPad + (availH - size) / 2;
+    const startY = contentTop + (contentH - size - labelH) / 2;
     return Array.from({ length: n }, (_, i) => ({
-      x: startX + i * (size + padding * 0.3), y: startY, size
+      x: startX + i * (size + gap), y: startY, size
     }));
   }
 
@@ -809,50 +1199,116 @@ function computeLayout(n, W, H, titleH, subtitleH, layout) {
     const rows = [];
     let rem = n;
     while (rem > 0) {
-      const rowCount = Math.min(rem, rows.length === 0 ? 1 : (rows[rows.length - 1].count + 1));
+      const rowCount = Math.min(rem, rows.length === 0 ? 1 : rows[rows.length - 1].count + 1);
       rows.push({ count: rowCount, start: n - rem });
       rem -= rowCount;
     }
     const numRows = rows.length;
-    const size = Math.min(availW / rows[rows.length - 1].count - padding * 0.4,
-      (availH - padding * (numRows - 1)) / numRows);
+    const maxCols = rows[rows.length - 1].count;
+    // Each row occupies (size + labelH); inter-row gap between bottom-of-label and top-of-next-photo
+    const size = Math.min(
+      (availW - gap * (maxCols - 1)) / maxCols,
+      (availH - gap * (numRows - 1) - labelH * numRows) / numRows
+    );
+    const totalBlockH = numRows * (size + labelH) + (numRows - 1) * gap;
+    const startY = contentTop + (contentH - totalBlockH) / 2;
     const positions = [];
     rows.forEach((row, ri) => {
-      const rowW = row.count * size + (row.count - 1) * padding * 0.3;
-      const rowX = (W - rowW) / 2;
-      const rowY = topPad + ri * (size + padding * 0.3);
+      const rowW  = row.count * size + (row.count - 1) * gap;
+      const rowX  = (W - rowW) / 2;
+      const rowY  = startY + ri * (size + labelH + gap);
       for (let j = 0; j < row.count; j++) {
-        positions.push({ x: rowX + j * (size + padding * 0.3), y: rowY, size });
+        positions.push({ x: rowX + j * (size + gap), y: rowY, size });
       }
     });
     return positions;
   }
 
-  // AUTO GRID
+  // AUTO GRID — photos centred in the 75% content zone
   let cols = Math.ceil(Math.sqrt(n * availW / availH));
+  cols = Math.max(1, Math.min(cols, n));
   let rows = Math.ceil(n / cols);
   if (cols * (rows - 1) >= n) rows--;
 
-  const cellW = (availW - (cols - 1) * padding * 0.3) / cols;
-  const cellH = (availH - (rows - 1) * padding * 0.3) / rows;
-  const size = Math.min(cellW, cellH);
-  const gridW = cols * size + (cols - 1) * padding * 0.3;
-  const gridH = rows * size + (rows - 1) * padding * 0.3;
+  // Size must fit within a cell that is (size + labelH) tall
+  const size   = Math.min(
+    (availW - gap * (cols - 1)) / cols,
+    (availH - gap * (rows - 1) - labelH * rows) / rows
+  );
+  const gridW  = cols * size + (cols - 1) * gap;
+  const gridH  = rows * (size + labelH) + (rows - 1) * gap;
   const startX = (W - gridW) / 2;
-  const startY = topPad + (availH - gridH) / 2;
+  const startY = contentTop + (contentH - gridH) / 2;
 
   return Array.from({ length: n }, (_, i) => {
-    const col = i % cols, row = Math.floor(i / cols);
-    const rowN = Math.ceil((n - row * cols) / 1);
+    const row      = Math.floor(i / cols);
     const rowCount = row === rows - 1 ? n - row * cols : cols;
-    const rowGridW = rowCount * size + (rowCount - 1) * padding * 0.3;
+    const rowGridW = rowCount * size + (rowCount - 1) * gap;
     const rowStartX = (W - rowGridW) / 2;
     return {
-      x: rowStartX + (i % rowCount) * (size + padding * 0.3),
-      y: startY + row * (size + padding * 0.3),
+      x: rowStartX + (i % rowCount) * (size + gap),
+      y: startY + row * (size + labelH + gap),  // row step = photo + label + gap
       size
     };
   });
+}
+
+// ═══════════════════════════════════════════════
+// DRAW LOGOS (header/footer zones)
+// ═══════════════════════════════════════════════
+function drawLogos(ctx, W, H, logos) {
+  const zoneH = H * 0.125;
+  const footerY = H * 0.875;
+  const pad = W * 0.025;
+  logos.forEach(logo => {
+    if (!logo || !logo.img) return;
+    const maxH = zoneH * 0.75;
+    const maxW = W * 0.22;
+    const scale = Math.min(maxH / logo.img.naturalHeight, maxW / logo.img.naturalWidth, 1);
+    const lw = logo.img.naturalWidth  * scale;
+    const lh = logo.img.naturalHeight * scale;
+    const pos = logo.position;
+    const inTop = pos.endsWith('t');
+    const baseY = inTop ? 0 : footerY;
+    const y = baseY + (zoneH - lh) / 2;
+    let x;
+    if      (pos.startsWith('l')) x = pad;
+    else if (pos.startsWith('r')) x = W - lw - pad;
+    else                          x = (W - lw) / 2;
+    ctx.drawImage(logo.img, x, y, lw, lh);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DRAW TEXT IN HEADER / FOOTER / CENTER
+// ═══════════════════════════════════════════════
+function drawTextItem(ctx, W, H, text, font, size, position, isLight) {
+  if (!text || !text.trim()) return;
+  const zoneH   = H * 0.125;
+  const footerY = H * 0.875;
+  const pad     = W * 0.04;
+  // scale size to canvas width (designed at 1080px wide)
+  const scaled  = Math.round(size * W / 1080);
+  ctx.save();
+  ctx.font         = `${scaled}px '${font}', sans-serif`;
+  ctx.shadowColor  = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur   = scaled * 0.12;
+  ctx.shadowOffsetY = scaled * 0.03;
+  ctx.fillStyle    = isLight ? '#111410' : '#f0ead6';
+  const zoneBaseline = zoneH * 0.68; // optical centre of zone
+  const posMap = {
+    'lt': { x: pad,     y: zoneBaseline,            align: 'left'   },
+    'ct': { x: W / 2,  y: zoneBaseline,             align: 'center' },
+    'rt': { x: W - pad, y: zoneBaseline,            align: 'right'  },
+    'lb': { x: pad,     y: footerY + zoneBaseline,  align: 'left'   },
+    'cb': { x: W / 2,  y: footerY + zoneBaseline,   align: 'center' },
+    'rb': { x: W - pad, y: footerY + zoneBaseline,  align: 'right'  },
+    'c':  { x: W / 2,  y: H / 2 + scaled * 0.35,   align: 'center' },
+  };
+  const p = posMap[position] || posMap['cb'];
+  ctx.textAlign = p.align;
+  ctx.fillText(text, p.x, p.y);
+  ctx.restore();
 }
 
 // ═══════════════════════════════════════════════
@@ -899,6 +1355,65 @@ function drawImageInShape(ctx, img, x, y, size, shape) {
 }
 
 // ═══════════════════════════════════════════════
+// IMAGE PROCESSING (API + fallback + cache)
+// ═══════════════════════════════════════════════
+// Cache key: name + size + lastModified (stable per file object)
+const _processCache = new Map();
+
+function _fileCacheKey(file) {
+  return `${file.name}|${file.size}|${file.lastModified}`;
+}
+
+function loadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+async function processImage(file, fallbackUrl) {
+  // Cache key includes bgRemoval mode so toggling produces fresh results
+  const key = _fileCacheKey(file) + '|' + (state.bgRemoval ? '1' : '0');
+  if (_processCache.has(key)) return _processCache.get(key);
+
+  let result;
+  if (!state.bgRemoval) {
+    // Fast path: skip API, use original image directly
+    result = await loadImage(fallbackUrl);
+  } else {
+    try {
+      const b64 = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      const resp = await fetch('/api/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: b64, size: 512 })
+      });
+      if (!resp.ok) throw new Error('API error');
+      const data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'API error');
+      result = await loadImage(data.image);
+    } catch {
+      result = await loadImage(fallbackUrl);
+    }
+  }
+  _processCache.set(key, result);
+  return result;
+}
+
+// Clear cache entry when a photo is removed
+function invalidateCacheForIndex(i) {
+  const key = _fileCacheKey(state.files[i]);
+  _processCache.delete(key);
+}
+
+// ═══════════════════════════════════════════════
 // GENERATE
 // ═══════════════════════════════════════════════
 generateBtn.addEventListener('click', async () => {
@@ -913,64 +1428,93 @@ generateBtn.addEventListener('click', async () => {
   outputCanvas.height = H;
   const ctx = outputCanvas.getContext('2d');
 
-  // Load all images
-  const imgs = await Promise.all(state.images.map(url => new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  })));
+  // Process images sequentially (one at a time) to avoid overloading the server.
+  // Already-processed images are served from cache instantly.
+  const total = state.files.length;
+  const imgs = [];
+  for (let i = 0; i < state.files.length; i++) {
+    const cached = _processCache.has(_fileCacheKey(state.files[i]));
+    if (!cached) spinner.title = `Processing ${i + 1}/${total}…`;
+    imgs.push(await processImage(state.files[i], state.images[i]));
+  }
   const validImgs = imgs.filter(Boolean);
 
   // BG
   drawBackground(ctx, W, H, state.bg);
 
-  // TITLE / SUBTITLE measurement
-  const isLight = state.bg === 'light';
-  const textColor = isLight ? '#111410' : '#f0ead6';
-  const padding = Math.min(W, H) * 0.05;
-  let yOffset = padding;
-  let titleH = 0, subtitleH = 0;
+  // Subtle zone dividers (header/footer boundary lines)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, H * 0.125); ctx.lineTo(W, H * 0.125);
+  ctx.moveTo(0, H * 0.875); ctx.lineTo(W, H * 0.875);
+  ctx.stroke();
+  ctx.restore();
 
-  if (state.title) {
-    const tSize = Math.min(W * 0.1, H * 0.08, 120);
-    titleH = tSize + tSize * 0.2;
-  }
-  if (state.subtitle) {
-    const sSize = Math.min(W * 0.045, H * 0.04, 60);
-    subtitleH = sSize + sSize * 0.2;
-  }
+  // Layout photos in 75% content zone
+  const isLight  = state.bg === 'light';
+  const hasLabels = state.photoMeta.some(m => m && (m.name || m.designation));
+  const sc        = state.photoSize;   // size scale (0.4–1.6)
+  const gm        = state.photoGap;   // gap multiplier
 
-  // Layout positions
-  const positions = computeLayout(validImgs.length, W, H, titleH, subtitleH, state.layout);
+  // Pass 1 — label-free layout to learn base photo size (font must scale to it)
+  const sizeRef = hasLabels
+    ? (computeLayout(validImgs.length, W, H, state.layout, 0, gm)[0]?.size || W * 0.15)
+    : 0;
 
-  // Draw each face
+  // Font sizes proportional to photo size
+  const nameSize  = hasLabels ? Math.max(12, Math.round(Math.min(sizeRef * sc * 0.16, W * 0.038))) : 0;
+  const desigSize = hasLabels ? Math.max(10, Math.round(nameSize * 0.78)) : 0;
+  const labelGap  = hasLabels ? Math.round(sizeRef * sc * 0.06) : 0;
+  const labelH    = hasLabels ? labelGap + nameSize + Math.round(nameSize * 0.2) + desigSize : 0;
+
+  // Pass 2 — layout with label space reserved per row
+  const positions = computeLayout(validImgs.length, W, H, state.layout, labelH, gm);
+
   positions.forEach((pos, i) => {
-    if (validImgs[i]) drawImageInShape(ctx, validImgs[i], pos.x, pos.y, pos.size, state.shape);
+    // Apply size scale — keep photo centred in its grid cell
+    const drawSize = pos.size * sc;
+    const drawX    = pos.x + (pos.size - drawSize) / 2;
+    const drawY    = pos.y + (pos.size - drawSize) / 2;
+
+    if (validImgs[i]) drawImageInShape(ctx, validImgs[i], drawX, drawY, drawSize, state.shape);
+
+    // Draw name / designation below the (scaled) shape
+    const meta = state.photoMeta[i];
+    if (!hasLabels || !meta || (!meta.name && !meta.designation)) return;
+    const cx    = drawX + drawSize / 2;
+    let   textY = drawY + drawSize + labelGap;
+    ctx.save();
+    ctx.textAlign = 'center';
+    if (meta.name) {
+      ctx.font          = `600 ${nameSize}px 'Oswald', sans-serif`;
+      ctx.shadowColor   = 'rgba(0,0,0,0.75)';
+      ctx.shadowBlur    = nameSize * 0.2;
+      ctx.shadowOffsetY = nameSize * 0.05;
+      ctx.fillStyle     = isLight ? '#111410' : '#f0ead6';
+      textY += nameSize;
+      ctx.fillText(meta.name, cx, textY);
+      textY += Math.round(nameSize * 0.2);
+    }
+    if (meta.designation) {
+      ctx.font          = `${desigSize}px 'Inter', sans-serif`;
+      ctx.shadowColor   = 'rgba(0,0,0,0.65)';
+      ctx.shadowBlur    = desigSize * 0.15;
+      ctx.shadowOffsetY = desigSize * 0.04;
+      ctx.fillStyle     = isLight ? '#555' : '#9aaa94';
+      textY += desigSize;
+      ctx.fillText(meta.designation, cx, textY);
+    }
+    ctx.restore();
   });
 
-  // Title
-  if (state.title) {
-    const tSize = Math.min(W * 0.1, H * 0.08, 120);
-    ctx.font = `${tSize}px 'Bebas Neue', sans-serif`;
-    ctx.fillStyle = textColor;
-    ctx.textAlign = 'center';
-    ctx.letterSpacing = '4px';
-    ctx.fillText(state.title.toUpperCase(), W / 2, H - padding - subtitleH - (subtitleH > 0 ? tSize * 0.2 : 0));
-    // Red underline
-    const tw = ctx.measureText(state.title.toUpperCase()).width;
-    ctx.fillStyle = '#c0392b';
-    ctx.fillRect(W / 2 - tw / 2, H - padding - subtitleH - tSize * 0.12, tw, tSize * 0.06);
-  }
+  // Draw logos in header/footer zones
+  drawLogos(ctx, W, H, state.logos);
 
-  // Subtitle
-  if (state.subtitle) {
-    const sSize = Math.min(W * 0.045, H * 0.04, 60);
-    ctx.font = `600 ${sSize}px 'Oswald', sans-serif`;
-    ctx.fillStyle = '#c0392b';
-    ctx.textAlign = 'center';
-    ctx.fillText(state.subtitle, W / 2, H - padding * 0.6);
-  }
+  // Draw title & subtitle at user-chosen positions
+  drawTextItem(ctx, W, H, state.title.toUpperCase(), state.titleFont, state.titleSize, state.titlePos, isLight);
+  drawTextItem(ctx, W, H, state.subtitle, state.subtitleFont, state.subtitleSize, state.subtitlePos, isLight);
 
   spinner.style.display = 'none';
   outputCanvas.style.display = 'block';

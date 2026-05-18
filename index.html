@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GroupShot — Team Photo Creator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #111410;
+      --surface: #1a1e18;
+      --surface2: #222820;
+      --green: #1b3a2d;
+      --green-light: #2d5c44;
+      --red: #c0392b;
+      --red-light: #e74c3c;
+      --cream: #f0ead6;
+      --cream-dim: #c8bfa8;
+      --gray: #6b7066;
+      --border: #2e342b;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'Oswald', sans-serif;
+      --font-ui: 'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--green);
+      border-bottom: 3px solid var(--red);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      letter-spacing: 3px;
+      color: var(--cream);
+      text-transform: uppercase;
+    }
+    .logo span { color: var(--red-light); }
+    .header-tag {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--cream-dim);
+      text-transform: uppercase;
+    }
+
+    /* ── HERO STRIP ── */
+    .hero-strip {
+      background: var(--red);
+      padding: 8px 24px;
+      text-align: center;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .app-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: var(--green);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--red);
+    }
+    .panel-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: var(--cream);
+    }
+    .panel-num {
+      background: var(--red);
+      color: var(--cream);
+      width: 26px; height: 26px;
+      border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .panel-body { padding: 20px; }
+
+    /* ── DROP ZONE ── */
+    .drop-zone {
+      border: 2px dashed var(--green-light);
+      border-radius: 4px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: var(--surface2);
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--red);
+      background: #1e2b22;
+    }
+    .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .drop-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+    .drop-zone h3 {
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .drop-zone p { font-size: 0.8rem; color: var(--gray); }
+
+    /* ── THUMBNAILS ── */
+    .thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .thumb-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      background: var(--surface2);
+    }
+    .thumb-item img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-item .remove-btn {
+      position: absolute;
+      top: 2px; right: 2px;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 2px;
+      width: 18px; height: 18px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .thumb-item:hover .remove-btn { opacity: 1; }
+
+    /* ── SECTION LABEL ── */
+    .sec-label {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--red-light);
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+    .sec-label:first-child { margin-top: 0; }
+
+    /* ── OPTION GRID ── */
+    .opt-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .opt-btn {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--cream-dim);
+      padding: 7px 14px;
+      border-radius: 3px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-transform: uppercase;
+    }
+    .opt-btn:hover { border-color: var(--green-light); color: var(--cream); }
+    .opt-btn.active {
+      background: var(--green);
+      border-color: var(--red);
+      color: var(--cream);
+    }
+    .opt-btn.shape-btn { min-width: 70px; }
+    .shape-icon { display: block; font-size: 1.4rem; text-align: center; margin-bottom: 2px; }
+
+    /* ── INPUTS ── */
+    .text-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--cream);
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .text-input:focus { border-color: var(--red); }
+    .text-input::placeholder { color: var(--gray); }
+    .input-row { margin-bottom: 10px; }
+
+    /* ── GENERATE BUTTON ── */
+    .gen-btn {
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--red);
+      border: none;
+      color: var(--cream);
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.15s;
+    }
+    .gen-btn:hover { background: var(--red-light); }
+    .gen-btn:disabled { background: var(--gray); cursor: not-allowed; opacity: 0.6; }
+
+    /* ── PREVIEW PANEL ── */
+    .preview-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .canvas-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      min-height: 300px;
+    }
+    #outputCanvas {
+      max-width: 100%;
+      max-height: 500px;
+      border-radius: 3px;
+      display: none;
+    }
+    .canvas-placeholder {
+      text-align: center;
+      color: var(--gray);
+    }
+    .canvas-placeholder .ph-icon { font-size: 4rem; margin-bottom: 12px; opacity: 0.4; }
+    .canvas-placeholder p {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .dl-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      border: 1.5px solid var(--green-light);
+      color: var(--cream);
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.15s;
+      display: none;
+    }
+    .dl-btn:hover { background: var(--green-light); }
+
+    /* ── BADGE STRIP ── */
+    .badge-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 2px;
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .badge.active { color: var(--cream-dim); border-color: var(--green-light); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.75rem;
+      color: var(--gray);
+      letter-spacing: 2px;
+      font-family: var(--font-body);
+      text-transform: uppercase;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── LOADING SPINNER ── */
+    .spinner {
+      display: none;
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── COUNT BADGE ── */
+    .count-badge {
+      background: var(--red);
+      color: white;
+      border-radius: 10px;
+      padding: 1px 8px;
+      font-size: 0.75rem;
+      font-family: var(--font-ui);
+      margin-left: 8px;
+    }
+
+    /* Diagonal decorative corner */
+    .deco-corner {
+      position: fixed;
+      bottom: 0; right: 0;
+      width: 120px; height: 120px;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0.07;
+    }
+    .deco-corner::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: -60px;
+      width: 120px; height: 120px;
+      background: var(--red);
+      transform: rotate(45deg);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Group<span>Shot</span></div>
+  <div class="header-tag">Team Photo Creator</div>
+</header>
+<div class="hero-strip">Upload · Customize · Export — Build Your Team Portrait</div>
+
+<div class="container">
+  <div class="app-grid">
+
+    <!-- LEFT: CONTROLS -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+      <!-- UPLOAD -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num">1</div>
+          <h2>Upload Team Photos</h2>
+        </div>
+        <div class="panel-body">
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" multiple accept="image/*" />
+            <div class="drop-icon">📸</div>
+            <h3>Drop images here</h3>
+            <p>Or click to browse · JPG, PNG, WEBP</p>
+          </div>
+          <div class="thumb-grid" id="thumbGrid"></div>
+        </div>
+      </div>
+
+      <!-- ASPECT RATIO -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num">2</div>
+          <h2>Canvas Size</h2>
+        </div>
+        <div class="panel-body">
+          <div class="sec-label">Aspect Ratio</div>
+          <div class="opt-grid" id="ratioGrid">
+            <button class="opt-btn" data-ratio="16:9">16:9</button>
+            <button class="opt-btn active" data-ratio="9:16">9:16</button>
+            <button class="opt-btn" data-ratio="4:5">4:5</button>
+            <button class="opt-btn" data-ratio="5:4">5:4</button>
+            <button class="opt-btn" data-ratio="1:1">1:1</button>
+            <button class="opt-btn" data-ratio="3:2">3:2</button>
+            <button class="opt-btn" data-ratio="2:3">2:3</button>
+            <button class="opt-btn" data-ratio="4:3">4:3</button>
+            <button class="opt-btn" data-ratio="3:4">3:4</button>
+            <button class="opt-btn" data-ratio="21:9">21:9</button>
+            <button class="opt-btn" data-ratio="2:1">2:1</button>
+            <button class="opt-btn" data-ratio="1:2">1:2</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHAPE -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num">3</div>
+          <h2>Photo Shape</h2>
+        </div>
+        <div class="panel-body">
+          <div class="opt-grid" id="shapeGrid">
+            <button class="opt-btn shape-btn active" data-shape="circle">
+              <span class="shape-icon">⬤</span>Circle
+            </button>
+            <button class="opt-btn shape-btn" data-shape="square">
+              <span class="shape-icon">■</span>Square
+            </button>
+            <button class="opt-btn shape-btn" data-shape="rounded">
+              <span class="shape-icon">▣</span>Rounded
+            </button>
+            <button class="opt-btn shape-btn" data-shape="heart">
+              <span class="shape-icon">♥</span>Heart
+            </button>
+            <button class="opt-btn shape-btn" data-shape="hexagon">
+              <span class="shape-icon">⬡</span>Hexagon
+            </button>
+            <button class="opt-btn shape-btn" data-shape="diamond">
+              <span class="shape-icon">◆</span>Diamond
+            </button>
+            <button class="opt-btn shape-btn" data-shape="star">
+              <span class="shape-icon">★</span>Star
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXT -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num">4</div>
+          <h2>Title & Subtitle</h2>
+        </div>
+        <div class="panel-body">
+          <div class="input-row">
+            <div class="sec-label">Title (optional)</div>
+            <input class="text-input" id="titleInput" type="text" placeholder="e.g. TEAM ALPHA 2025" maxlength="50" />
+          </div>
+          <div class="input-row">
+            <div class="sec-label">Subtitle (optional)</div>
+            <input class="text-input" id="subtitleInput" type="text" placeholder="e.g. Champions · Season 7" maxlength="80" />
+          </div>
+
+          <!-- LAYOUT OPTIONS -->
+          <div class="sec-label" style="margin-top:20px;">Layout</div>
+          <div class="opt-grid" id="layoutGrid">
+            <button class="opt-btn active" data-layout="auto">Auto Grid</button>
+            <button class="opt-btn" data-layout="row">Single Row</button>
+            <button class="opt-btn" data-layout="pyramid">Pyramid</button>
+          </div>
+
+          <!-- BG OPTIONS -->
+          <div class="sec-label" style="margin-top:16px;">Background</div>
+          <div class="opt-grid" id="bgGrid">
+            <button class="opt-btn active" data-bg="dark">Dark</button>
+            <button class="opt-btn" data-bg="green">Forest</button>
+            <button class="opt-btn" data-bg="red">Red</button>
+            <button class="opt-btn" data-bg="light">Light</button>
+            <button class="opt-btn" data-bg="gradient">Gradient</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="gen-btn" id="generateBtn" disabled>⚡ Generate Group Photo</button>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="preview-wrap">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num">5</div>
+          <h2>Preview <span id="photoCount" class="count-badge">0 photos</span></h2>
+        </div>
+        <div class="panel-body" style="padding:12px;">
+          <div class="canvas-wrap" id="canvasWrap">
+            <div class="canvas-placeholder" id="placeholder">
+              <div class="ph-icon">🖼</div>
+              <p>Your group photo<br>will appear here</p>
+            </div>
+            <div class="spinner" id="spinner"></div>
+            <canvas id="outputCanvas"></canvas>
+          </div>
+          <button class="dl-btn" id="downloadBtn">⬇ Download Group Photo</button>
+
+          <!-- INFO BADGES -->
+          <div class="badge-strip" style="margin-top:14px;">
+            <div class="badge active" id="badgeRatio">9:16</div>
+            <div class="badge active" id="badgeShape">Circle</div>
+            <div class="badge" id="badgeCount">0 Members</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIPS -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-num" style="background:var(--gray);">?</div>
+          <h2>Tips</h2>
+        </div>
+        <div class="panel-body" style="font-size:0.82rem;color:var(--cream-dim);line-height:1.6;">
+          <p>📌 <strong>Best results:</strong> Use portrait-cropped face photos with clear backgrounds.</p>
+          <p style="margin-top:8px;">📌 <strong>Face detection:</strong> Faces are auto-centered when cropped.</p>
+          <p style="margin-top:8px;">📌 <strong>Max photos:</strong> Up to 30 team members supported.</p>
+          <p style="margin-top:8px;">📌 <strong>Export:</strong> Downloads as high-res PNG, perfect for printing or sharing.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>GroupShot &mdash; Made with ❤ &mdash; Deploy to Vercel</footer>
+<div class="deco-corner"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+const state = {
+  files: [],
+  images: [],
+  ratio: '9:16',
+  shape: 'circle',
+  layout: 'auto',
+  bg: 'dark',
+  title: '',
+  subtitle: ''
+};
+
+// ═══════════════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const thumbGrid = document.getElementById('thumbGrid');
+const generateBtn = document.getElementById('generateBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const outputCanvas = document.getElementById('outputCanvas');
+const placeholder = document.getElementById('placeholder');
+const spinner = document.getElementById('spinner');
+const titleInput = document.getElementById('titleInput');
+const subtitleInput = document.getElementById('subtitleInput');
+const photoCount = document.getElementById('photoCount');
+const badgeRatio = document.getElementById('badgeRatio');
+const badgeShape = document.getElementById('badgeShape');
+const badgeCount = document.getElementById('badgeCount');
+
+// ═══════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════
+function handleFiles(newFiles) {
+  [...newFiles].forEach(f => {
+    if (!f.type.startsWith('image/')) return;
+    if (state.files.length >= 30) return;
+    const url = URL.createObjectURL(f);
+    state.files.push(f);
+    state.images.push(url);
+  });
+  renderThumbs();
+  updateUI();
+}
+
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+function renderThumbs() {
+  thumbGrid.innerHTML = '';
+  state.images.forEach((url, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-item';
+    wrap.innerHTML = `<img src="${url}" /><button class="remove-btn" data-i="${i}">✕</button>`;
+    thumbGrid.appendChild(wrap);
+  });
+  thumbGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const i = +e.target.dataset.i;
+      state.files.splice(i, 1);
+      state.images.splice(i, 1);
+      renderThumbs();
+      updateUI();
+    });
+  });
+}
+
+function updateUI() {
+  const n = state.images.length;
+  photoCount.textContent = `${n} photo${n !== 1 ? 's' : ''}`;
+  badgeCount.textContent = `${n} Member${n !== 1 ? 's' : ''}`;
+  badgeCount.className = n > 0 ? 'badge active' : 'badge';
+  generateBtn.disabled = n === 0;
+}
+
+// ═══════════════════════════════════════════════
+// OPTION BUTTONS
+// ═══════════════════════════════════════════════
+function bindOpts(gridId, stateKey, badgeEl) {
+  const grid = document.getElementById(gridId);
+  grid.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grid.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state[stateKey] = btn.dataset[stateKey === 'layout' ? 'layout' : stateKey === 'bg' ? 'bg' : stateKey === 'shape' ? 'shape' : 'ratio'];
+      if (badgeEl) badgeEl.textContent = btn.dataset[stateKey === 'shape' ? 'shape' : 'ratio'] || btn.textContent.trim();
+    });
+  });
+}
+bindOpts('ratioGrid', 'ratio', badgeRatio);
+bindOpts('shapeGrid', 'shape', badgeShape);
+bindOpts('layoutGrid', 'layout', null);
+bindOpts('bgGrid', 'bg', null);
+
+// Fix badge updates for shape/bg/layout
+document.getElementById('shapeGrid').querySelectorAll('.opt-btn').forEach(btn => {
+  btn.addEventListener('click', () => { badgeShape.textContent = btn.dataset.shape; });
+});
+
+// Text inputs
+titleInput.addEventListener('input', () => state.title = titleInput.value);
+subtitleInput.addEventListener('input', () => state.subtitle = subtitleInput.value);
+
+// ═══════════════════════════════════════════════
+// CANVAS DIMENSIONS
+// ═══════════════════════════════════════════════
+function getRatioDims(ratio) {
+  const map = {
+    '16:9': [1920, 1080], '9:16': [1080, 1920],
+    '4:5': [1080, 1350], '5:4': [1350, 1080],
+    '1:1': [1080, 1080], '3:2': [1500, 1000],
+    '2:3': [1000, 1500], '4:3': [1440, 1080],
+    '3:4': [1080, 1440], '21:9': [2100, 900],
+    '2:1': [1600, 800], '1:2': [800, 1600]
+  };
+  return map[ratio] || [1080, 1080];
+}
+
+// ═══════════════════════════════════════════════
+// CLIP SHAPES
+// ═══════════════════════════════════════════════
+function applyClipShape(ctx, x, y, size, shape) {
+  const r = size / 2;
+  const cx = x + r, cy = y + r;
+  ctx.save();
+  ctx.beginPath();
+  if (shape === 'circle') {
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  } else if (shape === 'square') {
+    ctx.rect(x, y, size, size);
+  } else if (shape === 'rounded') {
+    const rad = size * 0.15;
+    ctx.moveTo(x + rad, y);
+    ctx.lineTo(x + size - rad, y);
+    ctx.arcTo(x + size, y, x + size, y + rad, rad);
+    ctx.lineTo(x + size, y + size - rad);
+    ctx.arcTo(x + size, y + size, x + size - rad, y + size, rad);
+    ctx.lineTo(x + rad, y + size);
+    ctx.arcTo(x, y + size, x, y + size - rad, rad);
+    ctx.lineTo(x, y + rad);
+    ctx.arcTo(x, y, x + rad, y, rad);
+    ctx.closePath();
+  } else if (shape === 'heart') {
+    ctx.moveTo(cx, cy + r * 0.8);
+    ctx.bezierCurveTo(cx - r * 1.2, cy + r * 0.3, cx - r * 1.2, cy - r * 0.7, cx, cy - r * 0.2);
+    ctx.bezierCurveTo(cx + r * 1.2, cy - r * 0.7, cx + r * 1.2, cy + r * 0.3, cx, cy + r * 0.8);
+    ctx.closePath();
+  } else if (shape === 'hexagon') {
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      const px = cx + r * Math.cos(angle);
+      const py = cy + r * Math.sin(angle);
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  } else if (shape === 'diamond') {
+    ctx.moveTo(cx, y);
+    ctx.lineTo(x + size, cy);
+    ctx.lineTo(cx, y + size);
+    ctx.lineTo(x, cy);
+    ctx.closePath();
+  } else if (shape === 'star') {
+    const outerR = r, innerR = r * 0.42;
+    for (let i = 0; i < 10; i++) {
+      const angle = (Math.PI / 5) * i - Math.PI / 2;
+      const rad2 = i % 2 === 0 ? outerR : innerR;
+      const px = cx + rad2 * Math.cos(angle);
+      const py = cy + rad2 * Math.sin(angle);
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+  ctx.clip();
+}
+
+// ═══════════════════════════════════════════════
+// DRAW BACKGROUND
+// ═══════════════════════════════════════════════
+function drawBackground(ctx, W, H, bg) {
+  if (bg === 'dark') {
+    ctx.fillStyle = '#111410'; ctx.fillRect(0, 0, W, H);
+    // subtle noise texture via repeating tiny rects
+    ctx.fillStyle = 'rgba(255,255,255,0.012)';
+    for (let i = 0; i < W; i += 4) for (let j = 0; j < H; j += 4)
+      if (Math.random() > 0.7) ctx.fillRect(i, j, 2, 2);
+  } else if (bg === 'green') {
+    ctx.fillStyle = '#0d221a'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#1b3a2d'; ctx.fillRect(0, H * 0.6, W, H * 0.4);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0, 0, W, H);
+  } else if (bg === 'red') {
+    ctx.fillStyle = '#1a0808'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#6b1111'; ctx.fillRect(0, H * 0.7, W, H * 0.3);
+  } else if (bg === 'light') {
+    ctx.fillStyle = '#f0ead6'; ctx.fillRect(0, 0, W, H);
+  } else if (bg === 'gradient') {
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#0d221a');
+    grad.addColorStop(0.5, '#1a0a08');
+    grad.addColorStop(1, '#0a0a14');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  }
+
+  // Diagonal accent bar (top-left corner)
+  ctx.save();
+  ctx.translate(-W * 0.05, -H * 0.05);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = bg === 'light' ? 'rgba(192,57,43,0.08)' : 'rgba(192,57,43,0.06)';
+  ctx.fillRect(0, 0, W * 0.3, H * 1.5);
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════
+// LAYOUT COMPUTATION
+// ═══════════════════════════════════════════════
+function computeLayout(n, W, H, titleH, subtitleH, layout) {
+  const padding = Math.min(W, H) * 0.05;
+  const availW = W - padding * 2;
+  const usedH = titleH + subtitleH;
+  const topPad = usedH > 0 ? usedH + padding * 0.5 : padding * 0.5;
+  const availH = H - topPad - padding - usedH * 0;
+
+  if (layout === 'row') {
+    const size = Math.min(availH - padding, availW / n - padding * 0.3);
+    const totalW = n * size + (n - 1) * padding * 0.3;
+    const startX = (W - totalW) / 2;
+    const startY = topPad + (availH - size) / 2;
+    return Array.from({ length: n }, (_, i) => ({
+      x: startX + i * (size + padding * 0.3), y: startY, size
+    }));
+  }
+
+  if (layout === 'pyramid') {
+    const rows = [];
+    let rem = n;
+    while (rem > 0) {
+      const rowCount = Math.min(rem, rows.length === 0 ? 1 : (rows[rows.length - 1].count + 1));
+      rows.push({ count: rowCount, start: n - rem });
+      rem -= rowCount;
+    }
+    const numRows = rows.length;
+    const size = Math.min(availW / rows[rows.length - 1].count - padding * 0.4,
+      (availH - padding * (numRows - 1)) / numRows);
+    const positions = [];
+    rows.forEach((row, ri) => {
+      const rowW = row.count * size + (row.count - 1) * padding * 0.3;
+      const rowX = (W - rowW) / 2;
+      const rowY = topPad + ri * (size + padding * 0.3);
+      for (let j = 0; j < row.count; j++) {
+        positions.push({ x: rowX + j * (size + padding * 0.3), y: rowY, size });
+      }
+    });
+    return positions;
+  }
+
+  // AUTO GRID
+  let cols = Math.ceil(Math.sqrt(n * availW / availH));
+  let rows = Math.ceil(n / cols);
+  if (cols * (rows - 1) >= n) rows--;
+
+  const cellW = (availW - (cols - 1) * padding * 0.3) / cols;
+  const cellH = (availH - (rows - 1) * padding * 0.3) / rows;
+  const size = Math.min(cellW, cellH);
+  const gridW = cols * size + (cols - 1) * padding * 0.3;
+  const gridH = rows * size + (rows - 1) * padding * 0.3;
+  const startX = (W - gridW) / 2;
+  const startY = topPad + (availH - gridH) / 2;
+
+  return Array.from({ length: n }, (_, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const rowN = Math.ceil((n - row * cols) / 1);
+    const rowCount = row === rows - 1 ? n - row * cols : cols;
+    const rowGridW = rowCount * size + (rowCount - 1) * padding * 0.3;
+    const rowStartX = (W - rowGridW) / 2;
+    return {
+      x: rowStartX + (i % rowCount) * (size + padding * 0.3),
+      y: startY + row * (size + padding * 0.3),
+      size
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DRAW IMAGE INTO SHAPE
+// ═══════════════════════════════════════════════
+function drawImageInShape(ctx, img, x, y, size, shape) {
+  ctx.save();
+  // Shadow/glow
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = size * 0.08;
+  ctx.shadowOffsetY = size * 0.03;
+
+  // Border ring
+  ctx.beginPath();
+  applyClipShape(ctx, x, y, size, shape);
+  ctx.restore();
+
+  // Draw with clip
+  ctx.save();
+  applyClipShape(ctx, x, y, size, shape);
+
+  // Smart cover crop (center)
+  const r = size / 2, cx2 = x + r, cy2 = y + r;
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  const scale = Math.max(size / iw, size / ih);
+  const dw = iw * scale, dh = ih * scale;
+  const dx = cx2 - dw / 2, dy = cy2 - dh / 2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
+
+  // Border
+  ctx.save();
+  ctx.beginPath();
+  if (shape === 'circle') {
+    ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  } else {
+    applyClipShape(ctx, x - 1, y - 1, size + 2, shape);
+  }
+  ctx.strokeStyle = 'rgba(240,234,214,0.25)';
+  ctx.lineWidth = size * 0.025;
+  ctx.stroke();
+  ctx.restore();
+}
+
+// ═══════════════════════════════════════════════
+// GENERATE
+// ═══════════════════════════════════════════════
+generateBtn.addEventListener('click', async () => {
+  generateBtn.disabled = true;
+  spinner.style.display = 'block';
+  placeholder.style.display = 'none';
+  outputCanvas.style.display = 'none';
+  downloadBtn.style.display = 'none';
+
+  const [W, H] = getRatioDims(state.ratio);
+  outputCanvas.width = W;
+  outputCanvas.height = H;
+  const ctx = outputCanvas.getContext('2d');
+
+  // Load all images
+  const imgs = await Promise.all(state.images.map(url => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  })));
+  const validImgs = imgs.filter(Boolean);
+
+  // BG
+  drawBackground(ctx, W, H, state.bg);
+
+  // TITLE / SUBTITLE measurement
+  const isLight = state.bg === 'light';
+  const textColor = isLight ? '#111410' : '#f0ead6';
+  const padding = Math.min(W, H) * 0.05;
+  let yOffset = padding;
+  let titleH = 0, subtitleH = 0;
+
+  if (state.title) {
+    const tSize = Math.min(W * 0.1, H * 0.08, 120);
+    titleH = tSize + tSize * 0.2;
+  }
+  if (state.subtitle) {
+    const sSize = Math.min(W * 0.045, H * 0.04, 60);
+    subtitleH = sSize + sSize * 0.2;
+  }
+
+  // Layout positions
+  const positions = computeLayout(validImgs.length, W, H, titleH, subtitleH, state.layout);
+
+  // Draw each face
+  positions.forEach((pos, i) => {
+    if (validImgs[i]) drawImageInShape(ctx, validImgs[i], pos.x, pos.y, pos.size, state.shape);
+  });
+
+  // Title
+  if (state.title) {
+    const tSize = Math.min(W * 0.1, H * 0.08, 120);
+    ctx.font = `${tSize}px 'Bebas Neue', sans-serif`;
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '4px';
+    ctx.fillText(state.title.toUpperCase(), W / 2, H - padding - subtitleH - (subtitleH > 0 ? tSize * 0.2 : 0));
+    // Red underline
+    const tw = ctx.measureText(state.title.toUpperCase()).width;
+    ctx.fillStyle = '#c0392b';
+    ctx.fillRect(W / 2 - tw / 2, H - padding - subtitleH - tSize * 0.12, tw, tSize * 0.06);
+  }
+
+  // Subtitle
+  if (state.subtitle) {
+    const sSize = Math.min(W * 0.045, H * 0.04, 60);
+    ctx.font = `600 ${sSize}px 'Oswald', sans-serif`;
+    ctx.fillStyle = '#c0392b';
+    ctx.textAlign = 'center';
+    ctx.fillText(state.subtitle, W / 2, H - padding * 0.6);
+  }
+
+  spinner.style.display = 'none';
+  outputCanvas.style.display = 'block';
+  downloadBtn.style.display = 'block';
+  generateBtn.disabled = false;
+});
+
+// ═══════════════════════════════════════════════
+// DOWNLOAD
+// ═══════════════════════════════════════════════
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `groupshot-${state.ratio.replace(':', 'x')}-${Date.now()}.png`;
+  link.href = outputCanvas.toDataURL('image/png');
+  link.click();
+});
+
+updateUI();
+</script>
+</body>
+</html>
